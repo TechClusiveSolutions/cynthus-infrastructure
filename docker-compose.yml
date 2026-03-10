@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  store:
+    hostname: azure-store
+    container_name: cynthus-azure-store
+    restart: unless-stopped
+    stop_signal: SIGINT
+    image: cynthus/azure-store:latest
+    build:
+      context: ./containers/store
+    environment:
+      - TZ=America/Chicago
+      - "ACCEPT_EULA=Y"
+      - "MSSQL_SA_PASSWORD=${MSSQL_PASSWORD}"
+    networks:
+      - net
+      - backbone
+    logging:
+      driver: json-file 
+
+  messaging:
+    hostname: azure-messaging
+    container_name: cynthus-azure-messaging
+    restart: unless-stopped
+    stop_signal: SIGINT
+    image: cynthus/azure-messaging:latest
+    build:
+      context: ./containers/messaging
+    environment:
+      SQL_SERVER: store
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./containers/messaging/conf/service-bus.json:/ServiceBus_Emulator/ConfigFiles/Config.json
+    expose:
+      - "5672/tcp" # AMQP port for messaging
+      - "5300/tcp" # Management port
+    depends_on:
+      - store
+    networks:
+      net:
+        aliases:
+          - sb.cynthus.local  # Consistent hostname for all repos
+
+networks:
+  net:
+    external: true
+    name: cynthus_net
+  vnet-backend:
+    internal: true # No internet access, strictly internal like a secure backend subnet
+  vnet-services:
+    driver: bridge
