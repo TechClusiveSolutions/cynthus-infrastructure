@@ -31,9 +31,8 @@ services:
       SQL_SERVER: store
       MSSQL_SA_PASSWORD: '${STORE_PASSWORD}'
       ACCEPT_EULA: 'Y'
-      CONFIG_PATH: '/opt/app/conf/service-bus.json'
     volumes:
-      - './containers/messaging/conf:/opt/app/conf'
+      - './containers/messaging/conf:/opt/app/ConfigFiles'
     expose:
       - '5672/tcp' # AMQP port for messaging
       - '5300/tcp' # Management port
