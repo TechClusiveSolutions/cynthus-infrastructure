@@ -1,0 +1,48 @@
+{
+  "UserConfig": {
+    "Namespaces": [
+      {
+        "Name": "sb-cynthus-local",
+        "Queues": [],
+        "Topics": [
+          {
+            "Name": "cynthus-events-topic",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT1H",
+              "EnableBatchedOperations": true
+            },
+            "Subscriptions": [
+              {
+                "Name": "cynthus-api-sub",
+                "Properties": {
+                  "MaxDeliveryCount": 10
+                }
+              },
+              {
+                "Name": "cynthus-auth-sub",
+                "Properties": {
+                  "MaxDeliveryCount": 10
+                }
+              },
+              {
+                "Name": "cynthus-inventory-sub",
+                "Properties": {
+                  "MaxDeliveryCount": 10
+                }
+              },
+              {
+                "Name": "cynthus-analysis-sub",
+                "Properties": {
+                  "MaxDeliveryCount": 10
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Logging": {
+      "Type": "File"
+    }
+  }
+}

@@ -2,52 +2,50 @@ version: '3.9'
 
 services:
   store:
-    hostname: azure-store
-    container_name: cynthus-azure-store
+    hostname: store
+    container_name: cynthus-infra-store
     restart: unless-stopped
     stop_signal: SIGINT
-    image: cynthus/azure-store:latest
+    image: cynthus/infra-store:latest
     build:
       context: ./containers/store
     environment:
-      - TZ=America/Chicago
-      - "ACCEPT_EULA=Y"
-      - "MSSQL_SA_PASSWORD=${MSSQL_PASSWORD}"
+      - 'TZ=${TIME_ZONE}'
+      - 'ACCEPT_EULA=Y'
+      - 'MSSQL_SA_PASSWORD=${STORE_PASSWORD}'
     networks:
       - net
-      - backbone
     logging:
       driver: json-file 
 
   messaging:
-    hostname: azure-messaging
-    container_name: cynthus-azure-messaging
+    hostname: messaging
+    container_name: cynthus-infra-messaging
     restart: unless-stopped
     stop_signal: SIGINT
-    image: cynthus/azure-messaging:latest
+    image: cynthus/infra-messaging:latest
     build:
       context: ./containers/messaging
     environment:
+      TZ: '${TIME_ZONE}'
       SQL_SERVER: store
-      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
-      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: '${STORE_PASSWORD}'
+      ACCEPT_EULA: 'Y'
     volumes:
-      - ./containers/messaging/conf/service-bus.json:/ServiceBus_Emulator/ConfigFiles/Config.json
+      - './containers/messaging/conf/service-bus.json:/ServiceBus_Emulator/ConfigFiles/Config.json'
     expose:
-      - "5672/tcp" # AMQP port for messaging
-      - "5300/tcp" # Management port
-    depends_on:
-      - store
+      - '5672/tcp' # AMQP port for messaging
+      - '5300/tcp' # Management port
     networks:
       net:
         aliases:
-          - sb.cynthus.local  # Consistent hostname for all repos
+          - 'sb.cynthus.local' # Consistent hostname for all repos
+    depends_on:
+      - store
+    logging:
+      driver: json-file 
 
 networks:
   net:
     external: true
     name: cynthus_net
-  vnet-backend:
-    internal: true # No internet access, strictly internal like a secure backend subnet
-  vnet-services:
-    driver: bridge
